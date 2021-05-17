@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Pagination?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="640.0" prefWidth="960.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="evich.StaffController">
+    <children>
+      <Accordion VBox.vgrow="ALWAYS">
+        <panes>
+          <TitledPane text="Выбросы">
+               <content>
+                  <HBox spacing="10.0">
+                     <children>
+                          <GridPane hgap="5.0" vgap="5.0">
+                              <columnConstraints>
+                                  <ColumnConstraints prefWidth="135.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" prefWidth="150.0" />
+                              </columnConstraints>
+                              <rowConstraints>
+                                  <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              </rowConstraints>
+                              <children>
+                                  <Label text="Количество выбросов на 100 тактов" wrapText="true" />
+                                  <Spinner fx:id="noiseSpinner" prefWidth="150.0" GridPane.columnIndex="1" />
+                              <Label text="Sigma" GridPane.rowIndex="1" />
+                              <TextField fx:id="scaleField" maxWidth="-Infinity" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <Button mnemonicParsing="false" onAction="#onGenerateNoise" text="Сгенерировать" GridPane.rowIndex="2" />
+                              </children>
+                          </GridPane>
+                        <Pagination fx:id="noisePagination" maxWidth="1.7976931348623157E308" pageCount="4" prefHeight="240.0" style="-fx-background-color: white; -fx-border-color: lightgray;" HBox.hgrow="ALWAYS">
+                           <padding>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </padding>
+                        </Pagination>
+                     </children>
+                  </HBox>
+               </content>
+            </TitledPane>
+          <TitledPane text="Скачки">
+               <content>
+                  <HBox>
+                     <children>
+                          <GridPane hgap="5.0" vgap="20.0">
+                              <columnConstraints>
+                                  <ColumnConstraints />
+                                  <ColumnConstraints />
+                              </columnConstraints>
+                              <rowConstraints>
+                                  <RowConstraints />
+                                  <RowConstraints />
+                              <RowConstraints />
+                              </rowConstraints>
+                              <children>
+                                  <VBox spacing="2.0" GridPane.valignment="TOP">
+                                      <children>
+                                          <Label text="Моменты скачков" />
+                                          <HBox spacing="5.0">
+                                              <children>
+                                                  <Button mnemonicParsing="false" onAction="#onAddSteps" prefHeight="27.0" prefWidth="27.0" text="+" />
+                                                  <Button mnemonicParsing="false" onAction="#onRemoveSteps" prefHeight="27.0" prefWidth="27.0" text="-" />
+                                              </children>
+                                          </HBox>
+                                      </children>
+                                  </VBox>
+                                  <VBox spacing="2.0" GridPane.rowIndex="1">
+                                      <children>
+                                          <Label text="Амплидуды скачков" />
+                                    <Button mnemonicParsing="false" onAction="#onGenerateSteps" text="Сгенерировать">
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                      </children>
+                                  </VBox>
+                              <ScrollPane fx:id="stepsScrollPane" fitToHeight="true" fitToWidth="true" maxHeight="150.0" prefWidth="280.0" style="-fx-background-color: none;" GridPane.columnIndex="1">
+                                 <padding>
+                                    <Insets right="10.0" />
+                                 </padding>
+                                 <GridPane.margin>
+                                    <Insets />
+                                 </GridPane.margin>
+                              </ScrollPane>
+                              <ScrollPane fx:id="amplsScrollPane" fitToHeight="true" fitToWidth="true" maxHeight="150.0" prefWidth="280.0" style="-fx-background-color: none;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <padding>
+                                    <Insets right="10.0" />
+                                 </padding>
+                                 <GridPane.margin>
+                                    <Insets />
+                                 </GridPane.margin>
+                              </ScrollPane>
+                              </children>
+                          </GridPane>
+                        <Pagination fx:id="stepsPagination" maxWidth="1.7976931348623157E308" pageCount="4" prefHeight="240.0" style="-fx-background-color: white; -fx-border-color: lightgray;" HBox.hgrow="ALWAYS">
+                           <padding>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </padding>
+                        </Pagination>
+                     </children>
+                  </HBox>
+               </content>
+            </TitledPane>
+            <TitledPane text="Тренды">
+               <content>
+                  <HBox>
+                     <children>
+                          <GridPane hgap="5.0" vgap="5.0">
+                              <columnConstraints>
+                                  <ColumnConstraints prefWidth="135.0" />
+                                  <ColumnConstraints hgrow="ALWAYS" />
+                              </columnConstraints>
+                              <rowConstraints>
+                                  <RowConstraints />
+                              <RowConstraints />
+                              </rowConstraints>
+                              <children>
+                              <ScrollPane fx:id="trendsScrollPane" fitToHeight="true" fitToWidth="true" maxHeight="150.0" prefWidth="280.0" style="-fx-background-color: none;" GridPane.columnIndex="1">
+                                 <padding>
+                                    <Insets right="10.0" />
+                                 </padding>
+                                 <GridPane.margin>
+                                    <Insets />
+                                 </GridPane.margin>
+                              </ScrollPane>
+                              <VBox spacing="2.0">
+                                 <children>
+                                    <Label text="RegC" />
+                                    <Button mnemonicParsing="false" onAction="#onGenerateTrends" text="Сгенерировать">
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                 </children>
+                              </VBox>
+                              </children>
+                          </GridPane>
+                        <Pagination fx:id="trendsPagination" maxWidth="1.7976931348623157E308" pageCount="4" prefHeight="240.0" style="-fx-background-color: white; -fx-border-color: lightgray;" HBox.hgrow="ALWAYS">
+                           <padding>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </padding>
+                        </Pagination>
+                     </children>
+                  </HBox>
+               </content>
+            </TitledPane>
+        </panes>
+      </Accordion>
+      <VBox spacing="5.0">
+         <children>
+              <CheckBox fx:id="noiseCheckBox" disable="true" mnemonicParsing="false" text="Наложить выбросы" />
+              <CheckBox fx:id="stepsCheckBox" disable="true" mnemonicParsing="false" text="Наложить скачки" />
+              <CheckBox fx:id="trendsCheckBox" disable="true" mnemonicParsing="false" text="Наложить тренды" />
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </VBox>
+      <HBox alignment="TOP_RIGHT" spacing="5.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#onOk" prefWidth="70.0" text="ОК" />
+            <Button mnemonicParsing="false" onAction="#onCancel" prefWidth="70.0" text="Отмена" />
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </HBox>
+    </children>
+</VBox>

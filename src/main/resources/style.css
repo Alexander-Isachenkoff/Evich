@@ -1,0 +1,92 @@
+.borderless-titled-pane>*.title {
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #bebebe
+}
+
+.rows-titled-pane>*.title {
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-border-width: 0 0 1 1;
+    -fx-border-color: #bebebe
+}
+
+.stages-titled-pane>*.title {
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-border-width: 1 0 1 1;
+    -fx-border-color: #bebebe
+}
+
+.titled-pane>*.content {
+    -fx-border-color: none
+}
+
+.button {
+    -fx-background-radius: 2;
+    -fx-padding: 4 9
+}
+
+.button:focused, .combo-box:focused, .increment-arrow-button:focused {
+    -fx-focus-color: -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-faint-focus-color: transparent;
+    -fx-background-insets: 0, 1, 2;
+}
+
+.text-field {
+    -fx-background-radius: 0;
+    -fx-border-radius: 2;
+    -fx-padding: 2 5;
+    -fx-background-insets: 0;
+    -fx-border-color: -fx-outer-border;
+}
+
+.text-field:focused {
+    -fx-border-color: #888888;
+}
+
+.text-area {
+    -fx-background-radius: 3;
+    -fx-border-radius: 3;
+    -fx-border-color: #adadad;
+    -fx-background-insets: 0;
+    -fx-faint-focus-color: transparent;
+}
+
+.table-view {
+    -fx-text-fill: #181818;
+    //-fx-border-color: transparent;
+    //-fx-background-insets: 3;
+    //-fx-border-width: 0;
+}
+
+.table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color: #beeb75;
+    -fx-table-cell-border-color: transparent;
+}
+
+.table-view:focused .table-row-cell:filled:focused:selected .text {
+    -fx-fill: #181818;
+}
+
+.table-view:focused {
+    -fx-faint-focus-color: lightgray;
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 0;
+}
+
+.list-view:focused .list-cell:filled:focused:selected {
+    -fx-background-color: #beeb75;
+    -fx-text-fill: black;
+}
+
+.list-view:focused {
+    -fx-faint-focus-color: lightgray;
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 0;
+}
+
+// .default-color0.chart-series-line { -fx-stroke: #7995e8; }
+// .default-color1.chart-series-line { -fx-stroke: #f0e68c; }
+// .default-color2.chart-series-line { -fx-stroke: #dda0dd; }
