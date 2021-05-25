@@ -1,10 +1,12 @@
 package evich.model;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Experiment
+public class Experiment implements Serializable
 {
+    private static final long serialVersionUID = 4237212795388522471L;
     private final String name;
     private final Map<Stage, double[][]> dataRows = new HashMap<>();
     private LinearCoefficients[] linearCoefficients = new LinearCoefficients[0];

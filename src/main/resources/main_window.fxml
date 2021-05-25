@@ -26,6 +26,8 @@
                               <Button mnemonicParsing="false" onAction="#onAddExperiment" prefWidth="80.0" text="Добавить" />
                               <Button fx:id="deleteButton" disable="true" mnemonicParsing="false" onAction="#onDeleteExperiment" prefWidth="80.0" text="Удалить" />
                         <Button fx:id="editButton" disable="true" mnemonicParsing="false" prefWidth="80.0" text="Изменить" />
+                        <Button fx:id="saveButton" disable="true" mnemonicParsing="false" onAction="#onSaveExperiment" text="Сохранить" />
+                        <Button fx:id="loadButton" mnemonicParsing="false" onAction="#onLoadExperiment" prefWidth="80.0" text="Загрузить" />
                      </children>
                   </FlowPane>
                   <ListView fx:id="experimentsList" prefHeight="200.0" prefWidth="200.0" />

@@ -1,7 +1,10 @@
 package evich.model;
 
-public class LinearCoefficients
+import java.io.Serializable;
+
+public class LinearCoefficients implements Serializable
 {
+    private static final long serialVersionUID = -5291083257406853146L;
     public double a;
     public double b;
     

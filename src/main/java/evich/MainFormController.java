@@ -7,7 +7,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -27,7 +26,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
-import javafx.util.Callback;
+import javafx.stage.Window;
 
 import javax.imageio.ImageIO;
 import java.io.*;
@@ -46,6 +45,8 @@ public class MainFormController implements Initializable
     public TableColumn<LinearCoefficients, String> generatorColumn;
     public TableColumn<LinearCoefficients, Number> aColumn;
     public TableColumn<LinearCoefficients, Number> bColumn;
+    public Button saveButton;
+    public Button loadButton;
     
     // region FXML
     @FXML
@@ -61,7 +62,6 @@ public class MainFormController implements Initializable
     @FXML
     private Button deleteButton;
     // endregion
-    //private Experiment processedExperiment;
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -70,6 +70,7 @@ public class MainFormController implements Initializable
                 .addListener((observable, oldValue, experiment) -> {
                     deleteButton.setDisable(experiment == null);
                     editButton.setDisable(experiment == null);
+                    saveButton.setDisable(experiment == null);
                     processButton.setDisable(experiment == null);
                     
                     updateStepsBox(experiment);
@@ -77,24 +78,6 @@ public class MainFormController implements Initializable
                     updateCoefficientsTable(experiment);
                     updateChartBox();
                 });
-        
-        double[] z1 = new double[0];
-        double[] z2 = new double[0];
-        double[] z3 = new double[0];
-        double[] z4 = new double[0];
-        try {
-            z1 = IO.readDoubles(new File("z/z_1.txt"));
-            z2 = IO.readDoubles(new File("z/z_2.txt"));
-            z3 = IO.readDoubles(new File("z/z_3.txt"));
-            z4 = IO.readDoubles(new File("z/z_4.txt"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-        double[][] Z = new double[][]{ z1, z2, z3, z4 };
-        Experiment experiment = new Experiment("Эксперимент 1");
-        experiment.getDataRows().put(Stage.z, Z);
-        experiments.add(experiment);
         
         generatorColumn.setCellValueFactory(data -> {
             int index = coeffsTable.getItems().indexOf(data.getValue());
@@ -107,12 +90,15 @@ public class MainFormController implements Initializable
     
     private void updateCoefficientsTable(Experiment experiment) {
         coeffsTable.getItems().clear();
+        if (experiment == null) {
+            return;
+        }
         coeffsTable.setItems(FXCollections.observableArrayList(experiment.getLinearCoefficients()));
-//        if (experiment.getLinearCoefficients() != null) {
-//            for (LinearCoefficients c : experiment.getLinearCoefficients()) {
-//                coeffsTable.getItems().add(c);
-//            }
-//        }
+        //        if (experiment.getLinearCoefficients() != null) {
+        //            for (LinearCoefficients c : experiment.getLinearCoefficients()) {
+        //                coeffsTable.getItems().add(c);
+        //            }
+        //        }
     }
     
     @FXML
@@ -193,6 +179,9 @@ public class MainFormController implements Initializable
     private void updateStepsBox(Experiment experiment) {
         stepsBox.getChildren().clear();
         stepsVisibleProperties.clear();
+        if (experiment == null) {
+            return;
+        }
         for (Stage stage : Stage.values()) {
             if (experiment.getDataRows().containsKey(stage)) {
                 addNewStepProperty(stage);
@@ -212,6 +201,9 @@ public class MainFormController implements Initializable
     private void updateRowsBox(evich.model.Experiment experiment) {
         rowsBox.getChildren().clear();
         rowsVisibleProperties.clear();
+        if (experiment == null) {
+            return;
+        }
         for (int i = 0; i < experiment.getDataByStage(Stage.z).length; i++) {
             CheckBox checkBox = new CheckBox("Генератор " + (i + 1));
             SimpleBooleanProperty property = new SimpleBooleanProperty();
@@ -243,19 +235,46 @@ public class MainFormController implements Initializable
                 lineChart.setAnimated(false);
                 chartBox.getChildren().add(lineChart);
                 
+                int k = 0;
                 for (BooleanProperty property : stepsVisibleProperties.keySet()) {
                     if (property.get()) {
-                        XYChart.Series<Number, Number> series = new XYChart.Series<>();
-                        series.setName(property.getName());
-                        double[][] data = experiment.getDataRows().get(stepsVisibleProperties.get(property));
-                        for (int j = 0; j < data[i].length; j++) {
-                            series.getData().add(new XYChart.Data<>(j, data[i][j]));
+                        Stage stage = stepsVisibleProperties.get(property);
+                        
+                        double[] data = experiment.getDataRows().get(stage)[i];
+                        ObservableList<XYChart.Data<Number, Number>> dataList = FXCollections.observableArrayList();
+                        for (int j = 0; j < data.length; j++) {
+                            dataList.add(new XYChart.Data<>(j, data[j]));
                         }
+                        
+                        XYChart.Series<Number, Number> series = new XYChart.Series<>(stage.getName(), dataList);
                         lineChart.getData().add(series);
+                        
+                        String rgb = "rgb(" +
+                                String.join(", ",
+                                        String.valueOf(Math.round(stage.getColor().getRed() * 255)),
+                                        String.valueOf(Math.round(stage.getColor().getGreen() * 255)),
+                                        String.valueOf(Math.round(stage.getColor().getBlue()) * 255))
+                                + ")";
+                        
+                        changeColor(lineChart, k++, rgb);
                     }
                 }
             }
         }
+    }
+    
+    private void changeColor(LineChart<?, ?> lineChart, int position, String color) {
+        Node nl = lineChart.lookup(".default-color" + position + ".chart-series-line");
+        //Node ns = lineChart.lookup(".default-color" + position + ".chart-line-symbol");
+        Node nsl = lineChart.lookup(".default-color" + position + ".chart-legend-item-symbol");
+        
+        nl.setStyle("-fx-stroke: " + color + ";");
+        //ns.setStyle("-fx-background-color: " + color + ", white;");
+        if (nsl == null) {
+            System.out.println(position);
+            return;
+        }
+        nsl.setStyle("-fx-background-color: " + color + ", white;");
     }
     
     private Experiment getSelectedExperiment() {
@@ -271,6 +290,38 @@ public class MainFormController implements Initializable
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    @FXML
+    private void onSaveExperiment() {
+        Experiment experiment = getSelectedExperiment();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File("").getAbsoluteFile());
+        File file = fileChooser.showSaveDialog(getWindow());
+        if (file != null) {
+            try {
+                IO.writeObject(experiment, file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    @FXML
+    private void onLoadExperiment() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File("").getAbsoluteFile());
+        File file = fileChooser.showOpenDialog(getWindow());
+        try {
+            Experiment experiment = (Experiment) IO.readObject(file);
+            experiments.add(experiment);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private Window getWindow() {
+        return chartBox.getScene().getWindow();
     }
     
     public void saveAsPng(Node node, String fileName) {
