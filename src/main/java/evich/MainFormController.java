@@ -3,6 +3,7 @@ package evich;
 import evich.model.Experiment;
 import evich.model.LinearCoefficients;
 import evich.model.Stage;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -39,14 +40,7 @@ public class MainFormController implements Initializable
     private final ObservableList<evich.model.Experiment> experiments = FXCollections.observableArrayList();
     private final List<BooleanProperty> rowsVisibleProperties = new ArrayList<>();
     private final Map<BooleanProperty, Stage> stepsVisibleProperties = new HashMap<>();
-    public ListView<evich.model.Experiment> experimentsList;
-    public Button editButton;
-    public TableView<LinearCoefficients> coeffsTable;
-    public TableColumn<LinearCoefficients, String> generatorColumn;
-    public TableColumn<LinearCoefficients, Number> aColumn;
-    public TableColumn<LinearCoefficients, Number> bColumn;
-    public Button saveButton;
-    public Button loadButton;
+    public VBox rightPanel;
     
     // region FXML
     @FXML
@@ -61,7 +55,25 @@ public class MainFormController implements Initializable
     private VBox stepsBox;
     @FXML
     private Button deleteButton;
+    @FXML
+    public ListView<evich.model.Experiment> experimentsList;
+    @FXML
+    public Button editButton;
+    @FXML
+    public TableView<LinearCoefficients> coeffsTable;
+    @FXML
+    public TableColumn<LinearCoefficients, String> generatorColumn;
+    @FXML
+    public TableColumn<LinearCoefficients, Number> aColumn;
+    @FXML
+    public TableColumn<LinearCoefficients, Number> bColumn;
+    @FXML
+    public Button saveButton;
+    @FXML
+    public Button loadButton;
     // endregion
+    
+    private MeanVarTable meanVarTable = new MeanVarTable();
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -76,6 +88,7 @@ public class MainFormController implements Initializable
                     updateStepsBox(experiment);
                     updateRowsBox(experiment);
                     updateCoefficientsTable(experiment);
+                    updateMeanVarTable(experiment);
                     updateChartBox();
                 });
         
@@ -86,6 +99,8 @@ public class MainFormController implements Initializable
         
         aColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().a));
         bColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().b));
+        
+        rightPanel.getChildren().add(meanVarTable);
     }
     
     private void updateCoefficientsTable(Experiment experiment) {
@@ -99,6 +114,14 @@ public class MainFormController implements Initializable
         //                coeffsTable.getItems().add(c);
         //            }
         //        }
+    }
+    
+    private void updateMeanVarTable(Experiment experiment) {
+        meanVarTable.getItems().clear();
+        if (experiment == null) {
+            return;
+        }
+        meanVarTable.setItems(FXCollections.observableArrayList(experiment.getMeanVars()));
     }
     
     @FXML
@@ -140,11 +163,29 @@ public class MainFormController implements Initializable
         double[][] filtered_noise;
         Procession.StepsFiltrationResults stepsFiltrationResults;
         Procession.TrendsFiltrationResults trendsFiltrationResults;
+        double[] beforeM;
+        double[] beforeD;
+        double[] afterM;
+        double[] afterD;
+        
         try {
             int Ks = Integer.parseInt(ksTextField.getText());
             filtered_noise = Procession.filterNoise(experiment.getDataByStage(Stage.z));
             stepsFiltrationResults = Procession.filterSteps(filtered_noise, Ks);
             trendsFiltrationResults = Procession.filterTrends(stepsFiltrationResults.YnLin);
+    
+            beforeM = new double[trendsFiltrationResults.Yres_lin.length];
+            beforeD = new double[trendsFiltrationResults.Yres_lin.length];
+    
+            double[][] y0 = experiment.getDataByStage(Stage.y0);
+            if (y0 != null) {
+                beforeM = Procession.means(y0);
+                beforeD = Procession.vars(y0);
+            }
+    
+            afterM = Procession.means(trendsFiltrationResults.Yres_lin);
+            afterD = Procession.vars(trendsFiltrationResults.Yres_lin);
+            
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -171,6 +212,13 @@ public class MainFormController implements Initializable
         }
         experiment.setLinearCoefficients(linCoefficients);
         
+        MeanVar[] meanVars = new MeanVar[afterM.length];
+        for (int i = 0; i < meanVars.length; i++) {
+            meanVars[i] = new MeanVar(beforeM[i], beforeD[i], afterM[i], afterD[i]);
+        }
+        experiment.setMeanVars(meanVars);
+        
+        updateMeanVarTable(experiment);
         updateStepsBox(experiment);
         updateRowsBox(experiment);
         updateCoefficientsTable(experiment);
@@ -249,6 +297,7 @@ public class MainFormController implements Initializable
                         XYChart.Series<Number, Number> series = new XYChart.Series<>(stage.getName(), dataList);
                         lineChart.getData().add(series);
                         
+                        @SuppressWarnings("MagicNumber")
                         String rgb = "rgb(" +
                                 String.join(", ",
                                         String.valueOf(Math.round(stage.getColor().getRed() * 255)),
@@ -263,18 +312,21 @@ public class MainFormController implements Initializable
         }
     }
     
+    @SuppressWarnings("StringConcatenationMissingWhitespace")
     private void changeColor(LineChart<?, ?> lineChart, int position, String color) {
-        Node nl = lineChart.lookup(".default-color" + position + ".chart-series-line");
-        //Node ns = lineChart.lookup(".default-color" + position + ".chart-line-symbol");
-        Node nsl = lineChart.lookup(".default-color" + position + ".chart-legend-item-symbol");
-        
-        nl.setStyle("-fx-stroke: " + color + ";");
-        //ns.setStyle("-fx-background-color: " + color + ", white;");
-        if (nsl == null) {
-            System.out.println(position);
-            return;
-        }
-        nsl.setStyle("-fx-background-color: " + color + ", white;");
+        Platform.runLater(() -> {
+            Node nl = lineChart.lookup(".default-color" + position + ".chart-series-line");
+            //Node ns = lineChart.lookup(".default-color" + position + ".chart-line-symbol");
+            Node nsl = lineChart.lookup(".default-color" + position + ".chart-legend-item-symbol");
+    
+            nl.setStyle("-fx-stroke: " + color + ";");
+            //ns.setStyle("-fx-background-color: " + color + ", white;");
+            if (nsl == null) {
+                System.out.println(position);
+                return;
+            }
+            nsl.setStyle("-fx-background-color: " + color + ", white;");
+        });
     }
     
     private Experiment getSelectedExperiment() {
@@ -338,6 +390,7 @@ public class MainFormController implements Initializable
         }
     }
     
+    @SuppressWarnings("Convert2MethodRef")
     @FXML
     private void onExport() {
         Experiment experiment = getSelectedExperiment();

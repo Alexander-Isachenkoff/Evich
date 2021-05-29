@@ -20,6 +20,13 @@ class TestClass
     }
     
     @Test
+    void testVars() throws IOException {
+        double[][] z = readZ();
+        double[] vars = Procession.vars(z);
+        System.out.println(Arrays.toString(vars));
+    }
+    
+    @Test
     void testFiltration() throws IOException {
         double[][] Z = readZ();
         

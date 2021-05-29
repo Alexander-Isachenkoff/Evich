@@ -1,5 +1,7 @@
 package evich.model;
 
+import evich.MeanVar;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +12,7 @@ public class Experiment implements Serializable
     private final String name;
     private final Map<Stage, double[][]> dataRows = new HashMap<>();
     private LinearCoefficients[] linearCoefficients = new LinearCoefficients[0];
+    private MeanVar[] meanVars = new MeanVar[0];
     
     public Experiment(String name) {
         this.name = name;
@@ -17,6 +20,14 @@ public class Experiment implements Serializable
     
     public void setLinearCoefficients(LinearCoefficients[] linearCoefficients) {
         this.linearCoefficients = linearCoefficients;
+    }
+    
+    public void setMeanVars(MeanVar[] meanVars) {
+        this.meanVars = meanVars;
+    }
+    
+    public MeanVar[] getMeanVars() {
+        return meanVars;
     }
     
     public LinearCoefficients[] getLinearCoefficients() {

@@ -58,7 +58,7 @@
                   <SplitPane dividerPositions="0.6435185185185185" HBox.hgrow="ALWAYS">
                      <items>
                                 <VBox fx:id="chartBox" style="-fx-background-color: white;" />
-                                <VBox prefWidth="280.0" style="-fx-background-color: white;" SplitPane.resizableWithParent="false">
+                                <VBox fx:id="rightPanel" prefWidth="280.0" style="-fx-background-color: white;" SplitPane.resizableWithParent="false">
                                     <children>
                                         <TitledPane styleClass="rows-titled-pane" text="Ряды" VBox.vgrow="NEVER">
                                             <content>
