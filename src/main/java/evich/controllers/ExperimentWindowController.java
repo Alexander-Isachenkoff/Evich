@@ -1,4 +1,4 @@
-package evich;
+package evich.controllers;
 
 import javafx.fxml.Initializable;
 import javafx.scene.control.ToggleButton;

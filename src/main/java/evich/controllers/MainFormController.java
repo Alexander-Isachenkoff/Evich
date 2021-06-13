@@ -1,13 +1,14 @@
-package evich;
+package evich.controllers;
 
+import evich.IO;
+import evich.model.MeanVar;
+import evich.Procession;
 import evich.model.Experiment;
 import evich.model.LinearCoefficients;
 import evich.model.Stage;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -40,8 +41,15 @@ public class MainFormController implements Initializable
     private final ObservableList<evich.model.Experiment> experiments = FXCollections.observableArrayList();
     private final List<BooleanProperty> rowsVisibleProperties = new ArrayList<>();
     private final Map<BooleanProperty, Stage> stepsVisibleProperties = new HashMap<>();
-    public VBox rightPanel;
-    
+    @FXML
+    public ListView<Experiment> experimentsList;
+    @FXML
+    public Button editButton;
+    @FXML
+    public Button saveButton;
+    @FXML
+    public Button loadButton;
+    public Button statsButton;
     // region FXML
     @FXML
     private TextField ksTextField;
@@ -55,25 +63,7 @@ public class MainFormController implements Initializable
     private VBox stepsBox;
     @FXML
     private Button deleteButton;
-    @FXML
-    public ListView<evich.model.Experiment> experimentsList;
-    @FXML
-    public Button editButton;
-    @FXML
-    public TableView<LinearCoefficients> coeffsTable;
-    @FXML
-    public TableColumn<LinearCoefficients, String> generatorColumn;
-    @FXML
-    public TableColumn<LinearCoefficients, Number> aColumn;
-    @FXML
-    public TableColumn<LinearCoefficients, Number> bColumn;
-    @FXML
-    public Button saveButton;
-    @FXML
-    public Button loadButton;
     // endregion
-    
-    private MeanVarTable meanVarTable = new MeanVarTable();
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -84,50 +74,18 @@ public class MainFormController implements Initializable
                     editButton.setDisable(experiment == null);
                     saveButton.setDisable(experiment == null);
                     processButton.setDisable(experiment == null);
+                    statsButton.setDisable(experiment == null);
                     
                     updateStepsBox(experiment);
                     updateRowsBox(experiment);
-                    updateCoefficientsTable(experiment);
-                    updateMeanVarTable(experiment);
-                    updateChartBox();
+                    updateChartBox(experiment);
                 });
-        
-        generatorColumn.setCellValueFactory(data -> {
-            int index = coeffsTable.getItems().indexOf(data.getValue());
-            return new SimpleStringProperty("Генератор " + (index + 1));
-        });
-        
-        aColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().a));
-        bColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().b));
-        
-        rightPanel.getChildren().add(meanVarTable);
-    }
-    
-    private void updateCoefficientsTable(Experiment experiment) {
-        coeffsTable.getItems().clear();
-        if (experiment == null) {
-            return;
-        }
-        coeffsTable.setItems(FXCollections.observableArrayList(experiment.getLinearCoefficients()));
-        //        if (experiment.getLinearCoefficients() != null) {
-        //            for (LinearCoefficients c : experiment.getLinearCoefficients()) {
-        //                coeffsTable.getItems().add(c);
-        //            }
-        //        }
-    }
-    
-    private void updateMeanVarTable(Experiment experiment) {
-        meanVarTable.getItems().clear();
-        if (experiment == null) {
-            return;
-        }
-        meanVarTable.setItems(FXCollections.observableArrayList(experiment.getMeanVars()));
     }
     
     @FXML
     private void onAddExperiment() {
         FXMLLoader fxmlLoader =
-                new FXMLLoader(getClass().getResource("../create_experiment_scene.fxml"));
+                new FXMLLoader(getClass().getResource("/create_experiment_scene.fxml"));
         Parent root;
         try {
             root = fxmlLoader.load();
@@ -167,22 +125,28 @@ public class MainFormController implements Initializable
         double[] beforeD;
         double[] afterM;
         double[] afterD;
+        double[][] absError;
         
         try {
             int Ks = Integer.parseInt(ksTextField.getText());
             filtered_noise = Procession.filterNoise(experiment.getDataByStage(Stage.z));
             stepsFiltrationResults = Procession.filterSteps(filtered_noise, Ks);
             trendsFiltrationResults = Procession.filterTrends(stepsFiltrationResults.YnLin);
-    
+            
             beforeM = new double[trendsFiltrationResults.Yres_lin.length];
             beforeD = new double[trendsFiltrationResults.Yres_lin.length];
-    
+            absError = new double[trendsFiltrationResults.Yres_lin.length][trendsFiltrationResults.Yres_lin[0].length];
+            for (double[] values : absError) {
+                Arrays.fill(values, 0);
+            }
+            
             double[][] y0 = experiment.getDataByStage(Stage.y0);
             if (y0 != null) {
                 beforeM = Procession.means(y0);
                 beforeD = Procession.vars(y0);
+                absError = Procession.calcAbsError(y0, trendsFiltrationResults.Yres_lin);
             }
-    
+            
             afterM = Procession.means(trendsFiltrationResults.Yres_lin);
             afterD = Procession.vars(trendsFiltrationResults.Yres_lin);
             
@@ -218,10 +182,12 @@ public class MainFormController implements Initializable
         }
         experiment.setMeanVars(meanVars);
         
-        updateMeanVarTable(experiment);
+        experiment.setMoments(stepsFiltrationResults.moments);
+        experiment.setAmpls(stepsFiltrationResults.ampls);
+        experiment.setAbsError(absError);
+        
         updateStepsBox(experiment);
         updateRowsBox(experiment);
-        updateCoefficientsTable(experiment);
     }
     
     private void updateStepsBox(Experiment experiment) {
@@ -239,14 +205,14 @@ public class MainFormController implements Initializable
     
     private void addNewStepProperty(Stage stage) {
         BooleanProperty property = new SimpleBooleanProperty(null, stage.getName(), false);
-        property.addListener((observable, oldValue, newValue) -> updateChartBox());
+        property.addListener((observable, oldValue, newValue) -> updateChartBox(getSelectedExperiment()));
         CheckBox checkBox = new CheckBox(property.getName());
         checkBox.selectedProperty().bindBidirectional(property);
         stepsBox.getChildren().add(checkBox);
         stepsVisibleProperties.put(property, stage);
     }
     
-    private void updateRowsBox(evich.model.Experiment experiment) {
+    private void updateRowsBox(Experiment experiment) {
         rowsBox.getChildren().clear();
         rowsVisibleProperties.clear();
         if (experiment == null) {
@@ -255,7 +221,7 @@ public class MainFormController implements Initializable
         for (int i = 0; i < experiment.getDataByStage(Stage.z).length; i++) {
             CheckBox checkBox = new CheckBox("Генератор " + (i + 1));
             SimpleBooleanProperty property = new SimpleBooleanProperty();
-            property.addListener((observable, oldValue, newValue) -> updateChartBox());
+            property.addListener((observable, oldValue, newValue) -> updateChartBox(getSelectedExperiment()));
             rowsVisibleProperties.add(i, property);
             checkBox.selectedProperty().bindBidirectional(property);
             checkBox.setSelected(true);
@@ -263,11 +229,9 @@ public class MainFormController implements Initializable
         }
     }
     
-    private void updateChartBox() {
+    private void updateChartBox(Experiment experiment) {
         chartBox.getChildren().clear();
-        Experiment experiment = getSelectedExperiment();
         if (experiment == null) {
-            chartBox.getChildren().clear();
             return;
         }
         
@@ -318,7 +282,7 @@ public class MainFormController implements Initializable
             Node nl = lineChart.lookup(".default-color" + position + ".chart-series-line");
             //Node ns = lineChart.lookup(".default-color" + position + ".chart-line-symbol");
             Node nsl = lineChart.lookup(".default-color" + position + ".chart-legend-item-symbol");
-    
+            
             nl.setStyle("-fx-stroke: " + color + ";");
             //ns.setStyle("-fx-background-color: " + color + ", white;");
             if (nsl == null) {
@@ -438,6 +402,28 @@ public class MainFormController implements Initializable
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+    }
+    
+    @FXML
+    private void onStats() {
+        FXMLLoader fxmlLoader =
+                new FXMLLoader(getClass().getResource("/stats_form.fxml"));
+        Parent root;
+        try {
+            root = fxmlLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        javafx.stage.Stage stage = new javafx.stage.Stage();
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initOwner(experimentsList.getScene().getWindow());
+        stage.setScene(new Scene(root));
+    
+        StatsFormController controller = fxmlLoader.getController();
+        controller.setData(getSelectedExperiment());
+    
+        stage.showAndWait();
     }
     
     private String repeat(String string, int n) {

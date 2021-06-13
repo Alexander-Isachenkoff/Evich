@@ -5,14 +5,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class Procession
 {
+    private final static File argsFile = new File("args.txt");
+    
     public static double[][] generateMetrics(double[] Ar, double[] SRm, int count, int n) throws IOException {
         return toMatrix(execPython(
                 "python/metrics_generation_script.py",
@@ -51,18 +51,28 @@ public class Procession
     }
     
     public static double[] vars(double[][] data) throws IOException {
-        File argsFile = Files.write(new File("args.txt").toPath(), Collections.singleton(Arrays.deepToString(data))).toFile();
-        return toArray(execPython("python/vars.py", argsFile.getAbsolutePath()));
+        try {
+            Files.write(argsFile.toPath(), Collections.singleton(Arrays.deepToString(data))).toFile();
+            return toArray(execPython("python/vars.py", argsFile.getAbsolutePath()));
+        } finally {
+            argsFile.delete();
+        }
+
     }
     
     public static double[] means(double[][] data) throws IOException {
-        File argsFile = Files.write(new File("args.txt").toPath(), Collections.singleton(Arrays.deepToString(data))).toFile();
-        return toArray(execPython("python/means.py", argsFile.getAbsolutePath()));
+        try {
+            Files.write(argsFile.toPath(), Collections.singleton(Arrays.deepToString(data))).toFile();
+            return toArray(execPython("python/means.py", argsFile.getAbsolutePath()));
+        }
+        finally {
+            argsFile.delete();
+        }
     }
     
     private static String execPython(String file, String... args) throws IOException {
-         String[] command = Arrays.copyOf(new String[]{ "py", file }, 2 + args.length);
-         System.arraycopy(args, 0, command, 2, args.length);
+        String[] command = Arrays.copyOf(new String[]{ "py", file }, 2 + args.length);
+        System.arraycopy(args, 0, command, 2, args.length);
         
         ProcessBuilder pb = new ProcessBuilder(command);
         
@@ -93,21 +103,43 @@ public class Procession
         
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
         
-        // BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-        //
-        // System.out.println("Here is the standard error of the command (if any):\n");
-        // String s;
-        // while ((s = stdError.readLine()) != null) {
-        //     System.out.println(s);
-        // }
+//         BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+//
+//         System.out.println("Here is the standard error of the command (if any):\n");
+//         String s;
+//         while ((s = stdError.readLine()) != null) {
+//             System.out.println(s);
+//         }
         
         System.out.println("Cчитываю результаты...");
         String line1 = stdInput.readLine();
         String line2 = stdInput.readLine();
         String line3 = stdInput.readLine();
+        String line4 = stdInput.readLine();
+        String line5 = stdInput.readLine();
         
         System.out.println("Преобразовываю результаты в числа...");
-        return new StepsFiltrationResults(toMatrix(line1), toMatrix(line2), toMatrix(line3));
+        return new StepsFiltrationResults(
+                toMatrix(line1),
+                toMatrix(line2),
+                toMatrix(line3),
+                toMatrix(line4),
+                toMatrix(line5));
+    }
+    
+    public static double[][] calcAbsError(double[][] y0, double[][] y) throws IOException {
+        try {
+            Files.write(argsFile.toPath(),
+                    Arrays.asList(
+                            Arrays.deepToString(y0),
+                            Arrays.deepToString(y)))
+                    .toFile();
+            String s = execPython("python/abs_error_script.py", argsFile.getAbsolutePath());
+            System.out.println("s = " + s);
+            return toMatrix(s);
+        } finally {
+            argsFile.delete();
+        }
     }
     
     public static TrendsFiltrationResults filterTrends(double[][] YnLin) throws IOException {
@@ -161,11 +193,15 @@ public class Procession
         public double[][] found_steps;
         public double[][] Z_no_lin;
         public double[][] YnLin;
-        
-        public StepsFiltrationResults(double[][] found_steps, double[][] z_no_lin, double[][] ynLin) {
+        public double[][] moments;
+        public double[][] ampls;
+    
+        public StepsFiltrationResults(double[][] found_steps, double[][] z_no_lin, double[][] ynLin, double[][] moments, double[][] ampls) {
             this.found_steps = found_steps;
-            Z_no_lin = z_no_lin;
-            YnLin = ynLin;
+            this.Z_no_lin = z_no_lin;
+            this.YnLin = ynLin;
+            this.moments = moments;
+            this.ampls = ampls;
         }
     }
     

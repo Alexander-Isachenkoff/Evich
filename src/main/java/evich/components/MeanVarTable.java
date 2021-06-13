@@ -1,5 +1,6 @@
-package evich;
+package evich.components;
 
+import evich.model.MeanVar;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TableColumn;
@@ -7,15 +8,15 @@ import javafx.scene.control.TableView;
 
 public class MeanVarTable extends TableView<MeanVar>
 {
-    private final TableColumn<MeanVar, String> generatorColumn = new TableColumn<>("Генератор");
-    private final TableColumn<MeanVar, Number> beforeColumn = new TableColumn<>("До наложения скачков");
-    private final TableColumn<MeanVar, Number> afterColumn = new TableColumn<>("После фильтрации");
-    private final TableColumn<MeanVar, Number> beforeMColumn = new TableColumn<>("M");
-    private final TableColumn<MeanVar, Number> beforeDColumn = new TableColumn<>("D");
-    private final TableColumn<MeanVar, Number> afterMColumn = new TableColumn<>("M");
-    private final TableColumn<MeanVar, Number> afterDColumn = new TableColumn<>("D");
-    
-    MeanVarTable() {
+    public MeanVarTable() {
+        TableColumn<MeanVar, String> generatorColumn = new TableColumn<>("Генератор");
+        TableColumn<MeanVar, Number> beforeColumn = new TableColumn<>("Истинных рядов");
+        TableColumn<MeanVar, Number> afterColumn = new TableColumn<>("После фильтрации");
+        TableColumn<MeanVar, Number> beforeMColumn = new TableColumn<>("M");
+        TableColumn<MeanVar, Number> beforeDColumn = new TableColumn<>("D");
+        TableColumn<MeanVar, Number> afterMColumn = new TableColumn<>("M");
+        TableColumn<MeanVar, Number> afterDColumn = new TableColumn<>("D");
+        
         getColumns().add(generatorColumn);
         
         getColumns().add(beforeColumn);

@@ -1,5 +1,6 @@
-package evich;
+package evich.controllers;
 
+import evich.IO;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;

@@ -1,5 +1,7 @@
-package evich;
+package evich.controllers;
 
+import evich.Procession;
+import evich.components.TextFieldGrid;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
@@ -9,14 +11,12 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class StaffController implements Initializable
 {

@@ -1,7 +1,5 @@
 package evich.model;
 
-import evich.MeanVar;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,25 +11,52 @@ public class Experiment implements Serializable
     private final Map<Stage, double[][]> dataRows = new HashMap<>();
     private LinearCoefficients[] linearCoefficients = new LinearCoefficients[0];
     private MeanVar[] meanVars = new MeanVar[0];
+    private double[][] moments = new double[0][];
+    private double[][] ampls = new double[0][];
+    private double[][] absError = new double[0][];
     
     public Experiment(String name) {
         this.name = name;
     }
     
-    public void setLinearCoefficients(LinearCoefficients[] linearCoefficients) {
-        this.linearCoefficients = linearCoefficients;
+    public double[][] getAbsError() {
+        return absError;
     }
     
-    public void setMeanVars(MeanVar[] meanVars) {
-        this.meanVars = meanVars;
+    public void setAbsError(double[][] absError) {
+        this.absError = absError;
     }
     
     public MeanVar[] getMeanVars() {
         return meanVars;
     }
     
+    public void setMeanVars(MeanVar[] meanVars) {
+        this.meanVars = meanVars;
+    }
+    
+    public double[][] getMoments() {
+        return moments;
+    }
+    
+    public void setMoments(double[][] moments) {
+        this.moments = moments;
+    }
+    
+    public double[][] getAmpls() {
+        return ampls;
+    }
+    
+    public void setAmpls(double[][] ampls) {
+        this.ampls = ampls;
+    }
+    
     public LinearCoefficients[] getLinearCoefficients() {
         return linearCoefficients;
+    }
+    
+    public void setLinearCoefficients(LinearCoefficients[] linearCoefficients) {
+        this.linearCoefficients = linearCoefficients;
     }
     
     public Map<Stage, double[][]> getDataRows() {

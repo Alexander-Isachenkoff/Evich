@@ -42,6 +42,8 @@ class TestClass
         System.out.println(Arrays.deepToString(stepsFiltrationResults.found_steps));
         System.out.println(Arrays.deepToString(stepsFiltrationResults.YnLin));
         System.out.println(Arrays.deepToString(stepsFiltrationResults.Z_no_lin));
+        System.out.println(Arrays.deepToString(stepsFiltrationResults.moments));
+        System.out.println(Arrays.deepToString(stepsFiltrationResults.ampls));
         
         System.out.println("Фильтрую тренды...");
         Procession.TrendsFiltrationResults trendsFiltrationResults = Procession.filterTrends(stepsFiltrationResults.YnLin);
@@ -50,6 +52,12 @@ class TestClass
         System.out.println(Arrays.deepToString(trendsFiltrationResults.y2lin));
         System.out.println(Arrays.deepToString(trendsFiltrationResults.y_a_b));
         System.out.println(Arrays.deepToString(trendsFiltrationResults.Yres_lin));
+    }
+    
+    @Test
+    void testErrors() throws IOException {
+        double[][] absError = Procession.calcAbsError(readZ(), readZ());
+        System.out.println(Arrays.deepToString(absError));
     }
     
     @Test

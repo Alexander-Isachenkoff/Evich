@@ -86,7 +86,7 @@ def filter_steps2(Z, Ks):
     for j in range(1, n):
         YnLin[j] = YnLin[0] - Z_no_lin[j]
 
-    return found_steps, Z_no_lin, YnLin
+    return found_steps, Z_no_lin, YnLin, steps_moments, np.transpose(Alin)
 
 def find_steps(Z, Ks):
     M = []

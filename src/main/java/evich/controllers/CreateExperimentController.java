@@ -1,4 +1,4 @@
-package evich;
+package evich.controllers;
 
 import evich.model.Experiment;
 import javafx.fxml.FXML;
@@ -116,7 +116,7 @@ public class CreateExperimentController implements Initializable
     @FXML
     private void onGenerateY() {
         FXMLLoader fxmlLoader =
-                new FXMLLoader(getClass().getResource("../y_generation_scene.fxml"));
+                new FXMLLoader(getClass().getResource("/y_generation_scene.fxml"));
         Parent root;
         try {
             root = fxmlLoader.load();
@@ -144,7 +144,7 @@ public class CreateExperimentController implements Initializable
     @FXML
     private void onGenerateStaff() {
         FXMLLoader fxmlLoader =
-                new FXMLLoader(getClass().getResource("../staff_scene.fxml"));
+                new FXMLLoader(getClass().getResource("/staff_scene.fxml"));
         Parent root;
         try {
             root = fxmlLoader.load();
@@ -216,7 +216,7 @@ public class CreateExperimentController implements Initializable
     
     private double[][] loadDataRows() throws IOException {
         FXMLLoader fxmlLoader =
-                new FXMLLoader(getClass().getResource("../data_loading_scene.fxml"));
+                new FXMLLoader(getClass().getResource("/data_loading_scene.fxml"));
         Parent root = fxmlLoader.load();
         javafx.stage.Stage stage = new javafx.stage.Stage();
         stage.initModality(Modality.WINDOW_MODAL);

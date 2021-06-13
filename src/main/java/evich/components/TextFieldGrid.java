@@ -1,4 +1,4 @@
-package evich;
+package evich.components;
 
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -10,9 +10,9 @@ import java.util.function.Function;
 public class TextFieldGrid<T> extends GridPane
 {
     private final List<List<TextField>> textFields = new ArrayList<>();
+    private final Function<String, T> converter;
     private int rowsCount;
     private int columnsCount;
-    private Function<String, T> converter;
     
     public TextFieldGrid(Function<String, T> converter) {
         setHgap(5);
@@ -70,17 +70,6 @@ public class TextFieldGrid<T> extends GridPane
         }
     }
     
-//    public String[][] getInfo() {
-//        String[][] info = new String[getRowsCount()][];
-//        for (int i = 0; i < getRowsCount(); i++) {
-//            info[i] = new String[getColumnsCount()];
-//            for (int j = 0; j < getColumnsCount(); j++) {
-//                info[i][j] = textFields.get(i).get(j).getText();
-//            }
-//        }
-//        return info;
-//    }
-    
     public List<List<T>> getInfoAsList() {
         List<List<T>> info = new ArrayList<>();
         for (int i = 0; i < getRowsCount(); i++) {
@@ -100,13 +89,5 @@ public class TextFieldGrid<T> extends GridPane
     public void decRows() {
         if (getRowsCount() == 0) return;
         setRowsCount(getRowsCount() - 1);
-    }
-    
-    public void incCols() {
-    
-    }
-    
-    public void decCols() {
-    
     }
 }
